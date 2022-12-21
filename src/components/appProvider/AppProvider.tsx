@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@emotion/react";
-import type { FC, PropsWithChildren } from "react";
 import useTheme from "@hooks/useTheme";
+import type { FC, PropsWithChildren } from "react";
 
 const AppProvider: FC<PropsWithChildren> = ({ children }): JSX.Element => {
   const theme = useTheme();
