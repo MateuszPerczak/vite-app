@@ -1,4 +1,4 @@
-import { css, Global, Theme, useTheme } from "@emotion/react";
+import { css, Global, type Theme, useTheme } from "@emotion/react";
 import useWindowDimensions from "@hooks/useWindowDimensions";
 import type { FC } from "react";
 import { memo } from "react";
