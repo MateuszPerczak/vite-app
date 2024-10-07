@@ -2,9 +2,9 @@ import type { State } from "../useCanvas.types";
 
 export const renderSelection = (
   context: CanvasRenderingContext2D,
-  { mouse: { clickedPos, position }, selectedDrawablesId }: State,
+  { mouse: { clickedPos, position }, selectedDrawables }: State,
 ) => {
-  if (clickedPos === null || selectedDrawablesId !== null) return;
+  if (clickedPos === null || selectedDrawables !== null) return;
   context.rect(
     clickedPos.x,
     clickedPos.y,

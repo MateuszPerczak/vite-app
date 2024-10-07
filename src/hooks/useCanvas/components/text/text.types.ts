@@ -7,7 +7,7 @@ export type Text = {
 };
 
 export type TextProps = Partial<
-  Pick<Drawable<Text>, "position" | "padding" | "text" | "id" | "fontSize">
+  Pick<Drawable<Text>, "position" | "padding" | "text" | "fontSize">
 >;
 
 export type TextDrawable = Drawable<Text>;

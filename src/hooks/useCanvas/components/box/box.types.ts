@@ -8,7 +8,7 @@ export type Box = {
 };
 
 export type BoxProps = Partial<
-  Pick<Drawable<Box>, "position" | "padding" | "id" | "children" | "direction" | "gap">
+  Pick<Drawable<Box>, "position" | "padding" | "children" | "direction" | "gap">
 >;
 
 export type BoxDrawable = Drawable<Box>;

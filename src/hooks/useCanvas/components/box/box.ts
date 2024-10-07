@@ -1,11 +1,17 @@
-import type { Drawable } from "@hooks/useCanvas/useCanvas.types";
+import type { Drawable, OmitDrawableProps } from "@hooks/useCanvas/useCanvas.types";
 
 import type { Box, BoxProps } from "./box.types";
 
-export const box = ({ id, padding, position, children, direction, gap }: BoxProps) => {
-  const drawable: Omit<Drawable<Box>, "move" | "render" | "update"> = {
+export const box = ({
+  padding,
+  position,
+  children,
+  direction,
+  gap,
+}: BoxProps): Drawable<Box> => {
+  const drawable: Omit<Drawable<Box>, OmitDrawableProps> = {
     type: "box",
-    id: id ?? "",
+    id: "",
     dimensions: { w: 0, h: 0 },
     position: position ?? { x: 0, y: 0 },
     padding: padding ?? { top: 0, left: 0, bottom: 0, right: 0 },
@@ -18,11 +24,23 @@ export const box = ({ id, padding, position, children, direction, gap }: BoxProp
     .charAt(0)
     .toUpperCase()}${drawable.type.slice(1)}`;
 
-  const move: Drawable<Box>["move"] = (position) => {
-    drawable.position = position;
+  // methods
+  const init: Drawable<Box>["init"] = ({ id }) => {
+    drawable.id = id;
+    drawable.children.forEach((child, index) =>
+      child.init({ id: `${id}-child-${index}` }),
+    );
   };
 
-  const render: Drawable<Box>["render"] = (context, offset, showBounds) => {
+  const move: Drawable<Box>["move"] = (position, offset) => {
+    const x = position.x + (offset?.x ?? 0);
+    const y = position.y + (offset?.y ?? 0);
+    drawable.position = { x, y };
+  };
+
+  const render: Drawable<Box>["render"] = (context, { offset, showBounds, selected }) => {
+    if (drawable.id === "") return;
+
     const position = {
       x: drawable.position.x + offset.x,
       y: drawable.position.y + offset.y,
@@ -42,7 +60,11 @@ export const box = ({ id, padding, position, children, direction, gap }: BoxProp
       (acc, child, index) => {
         const gap = drawable.children.length - 1 !== index ? drawable.gap : 0;
         if (drawable.direction === "row") {
-          child.render(context, { x: xDraw, y: yDraw }, showBounds);
+          child.render(context, {
+            offset: { x: xDraw, y: yDraw },
+            showBounds,
+            selected: false,
+          });
           xDraw += child.dimensions.w + gap;
           return {
             w: acc.w + child.dimensions.w + gap,
@@ -50,7 +72,11 @@ export const box = ({ id, padding, position, children, direction, gap }: BoxProp
           };
         }
         if (drawable.direction === "column") {
-          child.render(context, { x: xDraw, y: yDraw }, showBounds);
+          child.render(context, {
+            offset: { x: xDraw, y: yDraw },
+            showBounds,
+            selected: false,
+          });
           yDraw += child.dimensions.h + gap;
           return {
             w: Math.max(acc.w, child.dimensions.w),
@@ -65,6 +91,18 @@ export const box = ({ id, padding, position, children, direction, gap }: BoxProp
 
     drawable.dimensions.w = drawable.padding.left + w + drawable.padding.right;
     drawable.dimensions.h = drawable.padding.top + h + drawable.padding.bottom;
+
+    if (selected) {
+      context.strokeStyle = "#fff";
+      context.setLineDash([4]);
+      context.strokeRect(
+        position.x,
+        position.y,
+        drawable.dimensions.w,
+        drawable.dimensions.h,
+      );
+      context.setLineDash([0]);
+    }
 
     if (showBounds) {
       context.strokeStyle = "#ff00cc";
@@ -85,10 +123,5 @@ export const box = ({ id, padding, position, children, direction, gap }: BoxProp
     ///
   };
 
-  return {
-    ...drawable,
-    move,
-    render,
-    update,
-  };
+  return Object.assign(drawable, { move, render, update, init }) as Drawable<Box>;
 };

@@ -1,18 +1,17 @@
-import type { Drawable } from "@hooks/useCanvas/useCanvas.types";
+import type { Drawable, OmitDrawableProps } from "@hooks/useCanvas/useCanvas.types";
 
 import type { Text, TextProps } from "./text.types";
 
 export const text = ({
-  id,
   text,
   position,
   padding,
   fontSize,
 }: TextProps): Drawable<Text> => {
-  const drawable: Omit<Drawable<Text>, "move" | "render" | "update"> = {
+  const drawable: Omit<Drawable<Text>, OmitDrawableProps> = {
     type: "text",
     text: text ?? "",
-    id: id ?? "",
+    id: "",
     fontSize: fontSize ?? 12,
     dimensions: { w: 0, h: 0 },
     position: position ?? { x: 0, y: 0 },
@@ -23,11 +22,22 @@ export const text = ({
     .charAt(0)
     .toUpperCase()}${drawable.type.slice(1)}`;
 
-  const move: Drawable<Text>["move"] = (position) => {
-    drawable.position = position;
+  // methods
+  const init: Drawable<Text>["init"] = ({ id }) => {
+    drawable.id = id;
   };
 
-  const render: Drawable<Text>["render"] = (context, offset, showBounds) => {
+  const move: Drawable<Text>["move"] = (position, offset) => {
+    const x = (offset?.x ?? 0) + position.x;
+    const y = (offset?.y ?? 0) + position.y;
+    drawable.position = { x, y };
+  };
+
+  const render: Drawable<Text>["render"] = (
+    context,
+    { offset, showBounds, selected },
+  ) => {
+    if (drawable.id === "") return;
     const position = {
       x: drawable.position.x + offset.x,
       y: drawable.position.y + offset.y,
@@ -48,6 +58,19 @@ export const text = ({
       position.y + drawable.padding.top + height,
     );
     context.font = prevFont;
+
+    if (selected) {
+      context.strokeStyle = "#fff";
+      context.setLineDash([4]);
+      context.strokeRect(
+        position.x,
+        position.y,
+        drawable.dimensions.w,
+        drawable.dimensions.h,
+      );
+      context.setLineDash([0]);
+    }
+
     // bounds
     if (showBounds) {
       context.strokeStyle = "#ff00cc";
@@ -68,10 +91,5 @@ export const text = ({
     ///
   };
 
-  return {
-    ...drawable,
-    move,
-    render,
-    update,
-  };
+  return Object.assign(drawable, { move, render, update, init }) as Drawable<Text>;
 };

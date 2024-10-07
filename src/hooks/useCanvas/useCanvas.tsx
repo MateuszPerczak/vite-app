@@ -1,17 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 
 import { box, text } from "./components";
-import { renderMouse, renderSelection } from "./render";
-import type { State } from "./useCanvas.types";
+import {
+  getDrawablesFromId,
+  getDrawablesFromPointing,
+  getDrawablesIds,
+  getDrawablesOffsets,
+} from "./helpers";
+import { renderDrawables, renderGui, renderSelection, renderStats } from "./render";
+import type { Drawables, Mouse, Position, State } from "./useCanvas.types";
 
 export const useCanvas = () => {
   const [state, setState] = useState<State>({
     drawables: [],
+    drawablesOffsets: {},
+    gui: {
+      drawables: [],
+      showBounds: true,
+    },
     mouse: {
       position: { x: 0, y: 0 },
       clickedPos: null,
+      isMouseDown: false,
     },
-    selectedDrawablesId: null,
+    selectedDrawables: null,
+    showBounds: false,
   });
 
   // helper functions
@@ -51,10 +64,25 @@ export const useCanvas = () => {
     const x = Math.min(Math.max(clientX - left, 0), width);
     const y = Math.min(Math.max(clientY - top, 0), height);
     setState((prevState) => {
+      const mouse: Mouse = { ...prevState.mouse, position: { x, y } };
+
+      const drawables = getDrawablesFromId(
+        prevState.drawables,
+        prevState.selectedDrawables,
+      );
+
+      void (
+        mouse.isMouseDown &&
+        drawables?.forEach((drawable) =>
+          drawable.move(mouse.position, prevState.drawablesOffsets?.[drawable.id]),
+        )
+      );
+
       const newState = {
         ...prevState,
-        mouse: { ...prevState.mouse, position: { x, y } },
+        mouse,
       };
+
       render(newState);
       return newState;
     });
@@ -68,9 +96,24 @@ export const useCanvas = () => {
     const x = Math.min(Math.max(clientX - left, 0), width);
     const y = Math.min(Math.max(clientY - top, 0), height);
     setState((prevState) => {
-      const newState = {
+      const mouse: Mouse = {
+        ...prevState.mouse,
+        position: { x, y },
+        clickedPos: { x, y },
+        isMouseDown: true,
+      };
+      const selectedDrawables = getDrawablesFromPointing(
+        mouse.position,
+        prevState.drawables,
+      );
+
+      const drawablesOffsets = getDrawablesOffsets(mouse.position, selectedDrawables);
+
+      const newState: State = {
         ...prevState,
-        mouse: { ...prevState.mouse, position: { x, y }, clickedPos: { x, y } },
+        mouse,
+        selectedDrawables: getDrawablesIds(selectedDrawables),
+        drawablesOffsets,
       };
       render(newState);
       return newState;
@@ -87,8 +130,13 @@ export const useCanvas = () => {
     setState((prevState) => {
       const newState: State = {
         ...prevState,
-        mouse: { ...prevState.mouse, position: { x, y }, clickedPos: null },
-        selectedDrawablesId: null,
+        drawablesOffsets: null,
+        mouse: {
+          ...prevState.mouse,
+          position: { x, y },
+          clickedPos: null,
+          isMouseDown: false,
+        },
       };
       render(newState);
       return newState;
@@ -103,45 +151,50 @@ export const useCanvas = () => {
 
     const context = canvas.getContext("2d");
     if (context === null) return;
+    const _state: State = targetState ?? state;
     // clear canvas
-
-    const mouse = (targetState ?? state).mouse;
-    const drawables = (targetState ?? state).drawables;
-
     context.clearRect(0, 0, canvas.width, canvas.height);
-    renderSelection(context, targetState ?? state);
-    renderMouse(context, mouse);
-    drawables.forEach((drawable) => drawable.render(context, { x: 0, y: 0 }, true));
+    renderSelection(context, _state);
+    renderStats(context, _state);
+    renderDrawables(context, _state);
+    renderGui(context, _state);
   };
 
   const init = () => {
+    const drawables: Drawables[] = [
+      box({
+        position: { x: 150, y: 210 },
+        padding: { top: 10, left: 10, right: 10, bottom: 10 },
+        direction: "column",
+        gap: 5,
+        children: [
+          text({
+            text: "Sperma to eksportowy towar",
+            position: { x: 0, y: 0 },
+            fontSize: 15,
+          }),
+          text({
+            text: "Siura wyciągam z kieszeni",
+            position: { x: 0, y: 0 },
+            fontSize: 10,
+          }),
+        ],
+      }),
+      text({
+        text: "Hahaha it was a bad idea",
+        position: { x: 100, y: 50 },
+        fontSize: 10,
+        padding: { top: 10, left: 10, right: 10, bottom: 10 },
+      }),
+    ];
+
     setState((prevState) => {
       const newState = {
         ...prevState,
-        drawables: [
-          box({
-            id: getId(10),
-            position: { x: 150, y: 210 },
-            padding: { top: 10, left: 10, right: 10, bottom: 10 },
-            direction: "column",
-            gap: 5,
-            children: [
-              text({
-                id: getId(10),
-                text: "Hahaha it was a bad idea",
-                position: { x: 0, y: 0 },
-                fontSize: 10,
-              }),
-            ],
-          }),
-          text({
-            id: getId(10),
-            text: "Hahaha it was a bad idea",
-            position: { x: 100, y: 50 },
-            fontSize: 10,
-            padding: { top: 10, left: 10, right: 10, bottom: 10 },
-          }),
-        ],
+        drawables: drawables.map((drawable) => {
+          drawable.init({ id: getId(10) });
+          return drawable;
+        }),
       };
       render(newState);
       return newState;
