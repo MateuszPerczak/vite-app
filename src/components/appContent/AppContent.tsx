@@ -1,13 +1,15 @@
-import GlobalStyle from "@components/globalStyle/GlobalStyle";
+import { useCanvas } from "@hooks/index";
 import type { FC } from "react";
 
-const AppContent: FC = (): JSX.Element => {
+import { GlobalStyle } from "..";
+
+export const AppContent: FC = (): JSX.Element => {
+  const [ref] = useCanvas();
+
   return (
     <>
-      <h1>Basic Vite app</h1>
+      <canvas ref={ref} style={{ outline: "1px solid white" }} width={800} height={600} />
       <GlobalStyle />
     </>
   );
 };
-
-export default AppContent;

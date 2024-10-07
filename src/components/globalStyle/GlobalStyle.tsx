@@ -2,7 +2,7 @@ import { css, Global, type Theme, useTheme } from "@emotion/react";
 import type { FC } from "react";
 import { memo } from "react";
 
-const GlobalStyle: FC = (): JSX.Element => {
+export const GlobalStyle: FC = memo((): JSX.Element => {
   const { background, color }: Theme = useTheme();
 
   return (
@@ -29,10 +29,13 @@ const GlobalStyle: FC = (): JSX.Element => {
         }
         #root {
           display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
         }
       `}
     />
   );
-};
+});
 
-export default memo(GlobalStyle);
+GlobalStyle.displayName = "GlobalStyle";
