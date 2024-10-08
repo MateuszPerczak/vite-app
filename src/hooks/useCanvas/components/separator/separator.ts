@@ -1,32 +1,33 @@
 import type { Drawable, OmitDrawableProps } from "@hooks/useCanvas/useCanvas.types";
 
-import type { Text, TextProps } from "./text.types";
+import type { Separator, SeparatorProps } from "./separator.types";
 
-export const text = ({
-  text,
-  padding,
-  fontSize,
-  overflow,
-}: TextProps): Drawable<Text> => {
-  const drawable: Omit<Drawable<Text>, OmitDrawableProps> = {
-    type: "text",
-    text: text ?? "",
+export const separator = ({ orientation, size }: SeparatorProps): Drawable<Separator> => {
+  const drawable: Omit<Drawable<Separator>, OmitDrawableProps> = {
+    type: "separator",
     id: "",
-    fontSize: fontSize ?? 12,
     dimensions: { w: 0, h: 0 },
     position: { x: 0, y: 0 },
-    padding: { top: 0, left: 0, bottom: 0, right: 0, ...padding },
-    offset: { x: 0, y: 0 },
-    overflow: overflow ?? false,
+    padding: { top: 0, left: 0, bottom: 0, right: 0 },
+    orientation: orientation || "vertical",
+    size: size ?? 10,
   };
 
   // methods
-  const init: Drawable<Text>["init"] = ({ id, position }) => {
+  const init: Drawable<Separator>["init"] = ({ id, position }) => {
     drawable.id = id;
+    if (drawable.orientation === "vertical") {
+      drawable.dimensions.h = drawable.size;
+      drawable.dimensions.w = 1;
+    }
+    if (drawable.orientation === "horizontal") {
+      drawable.dimensions.h = 1;
+      drawable.dimensions.w = drawable.size;
+    }
     drawable.position = { ...drawable.position, ...position };
   };
 
-  const move: Drawable<Text>["move"] = (position, constrain) => {
+  const move: Drawable<Separator>["move"] = (position, constrain) => {
     const x = Math.min(
       Math.max(position.x, constrain.minX),
       constrain.maxX - drawable.dimensions.w,
@@ -40,27 +41,16 @@ export const text = ({
     drawable.position = { x, y };
   };
 
-  const render: Drawable<Text>["render"] = (context, { showBounds, selected }) => {
+  const render: Drawable<Separator>["render"] = (context, { showBounds, selected }) => {
     if (drawable.id === "") return;
 
     context.fillStyle = "#fff";
-    const prevFont = context.font;
-    context.font = `${drawable.fontSize}px Arial`;
-    const { width: height } = context.measureText("M");
-    const { width } = context.measureText(drawable.text);
-
-    drawable.offset = { x: 0, y: height };
-    drawable.dimensions = {
-      w: drawable.padding.left + width + drawable.padding.right,
-      h: drawable.padding.top + height + drawable.padding.bottom,
-    };
-
-    context.fillText(
-      drawable.text,
-      drawable.position.x + drawable.padding.left + drawable.offset.x,
-      drawable.position.y + drawable.padding.top + drawable.offset.y,
+    context.fillRect(
+      drawable.position.x,
+      drawable.position.y,
+      drawable.dimensions.w,
+      drawable.dimensions.h,
     );
-    context.font = prevFont;
 
     if (selected && !showBounds) {
       context.strokeStyle = "#fff";
@@ -98,10 +88,9 @@ export const text = ({
       context.font = prevFont;
     }
   };
-  const update: Drawable<Text>["update"] = ({ fontSize, text }) => {
-    void (fontSize && (drawable.fontSize = fontSize));
-    void (text !== undefined && (drawable.text = text));
+  const update: Drawable<Separator>["update"] = () => {
+    ///
   };
 
-  return Object.assign(drawable, { move, render, update, init }) as Drawable<Text>;
+  return Object.assign(drawable, { move, render, update, init }) as Drawable<Separator>;
 };

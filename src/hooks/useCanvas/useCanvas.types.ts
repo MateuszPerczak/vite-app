@@ -1,4 +1,6 @@
 import type { BoxDrawable } from "./components/box/box.types";
+import type { ImgDrawable } from "./components/image/image.types";
+import type { SeparatorDrawable } from "./components/separator/separator.types";
 import type { TextDrawable } from "./components/text/text.types";
 
 export type State = {
@@ -7,48 +9,61 @@ export type State = {
   selectedDrawables: string[] | null;
   drawablesOffsets: Record<string, Position> | null;
   showBounds: boolean;
-  gui: Gui;
+  userInterface: UserInterface;
+  constrain: Constrain;
 };
 
-export type Gui = {
+export type UserInterface = {
   drawables: Drawables[];
   showBounds: boolean;
+  update: (props: State) => void;
 };
 
 export type Mouse = {
   position: Position;
   clickedPos: Position | null;
   isMouseDown: boolean;
+  isMouseSelecting: boolean;
+  wasMousePointingAtDrawable: boolean;
 };
 
-export type Drawables = TextDrawable | BoxDrawable;
+export type Drawables = TextDrawable | BoxDrawable | SeparatorDrawable | ImgDrawable;
 
 export type Drawable<T extends object> = {
   id: string;
   position: Position;
   dimensions: Dimensions;
   padding: Padding;
+
   render: (context: CanvasRenderingContext2D, renderProps: DrawableRenderProps) => void;
-  move: (position: Position, offset?: Position) => void;
-  update: (props: Pick<Drawable<T>, "dimensions" | "padding" | "position"> & T) => void;
+  move: (position: Position, constrain: Constrain) => void;
+  update: (props: Partial<T>) => void;
   init: (props: DrawableInitProps) => void;
 } & T;
 
 export type OmitDrawableProps = "move" | "render" | "update" | "init";
 
 export type DrawableRenderProps = {
-  offset: Position;
   showBounds?: boolean;
   selected: boolean;
+  constrain: Constrain;
 };
 
 export type DrawableInitProps = {
   id: string;
+  position?: Position;
 };
 
 export type Position = {
   x: number;
   y: number;
+};
+
+export type Constrain = {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
 };
 
 export type Dimensions = {

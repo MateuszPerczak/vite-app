@@ -1,4 +1,4 @@
-import type { Drawable, Drawables } from "@hooks/useCanvas/useCanvas.types";
+import type { Drawable, Drawables, Padding } from "@hooks/useCanvas/useCanvas.types";
 
 export type Box = {
   type: "box";
@@ -8,7 +8,9 @@ export type Box = {
 };
 
 export type BoxProps = Partial<
-  Pick<Drawable<Box>, "position" | "padding" | "children" | "direction" | "gap">
+  Pick<Drawable<Box>, "children" | "direction" | "gap"> & {
+    padding: Partial<Padding>;
+  }
 >;
 
 export type BoxDrawable = Drawable<Box>;

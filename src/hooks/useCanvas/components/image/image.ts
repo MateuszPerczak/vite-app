@@ -1,32 +1,51 @@
 import type { Drawable, OmitDrawableProps } from "@hooks/useCanvas/useCanvas.types";
 
-import type { Text, TextProps } from "./text.types";
+import type { Img, ImgProps } from "./image.types";
 
-export const text = ({
-  text,
-  padding,
-  fontSize,
-  overflow,
-}: TextProps): Drawable<Text> => {
-  const drawable: Omit<Drawable<Text>, OmitDrawableProps> = {
-    type: "text",
-    text: text ?? "",
+export const image = ({ src, padding, width, height }: ImgProps): Drawable<Img> => {
+  const drawable: Omit<Drawable<Img>, OmitDrawableProps> = {
+    type: "img",
     id: "",
-    fontSize: fontSize ?? 12,
     dimensions: { w: 0, h: 0 },
     position: { x: 0, y: 0 },
     padding: { top: 0, left: 0, bottom: 0, right: 0, ...padding },
-    offset: { x: 0, y: 0 },
-    overflow: overflow ?? false,
+    src: src ?? "",
+    image: new Image(),
+    height,
+    width,
   };
 
   // methods
-  const init: Drawable<Text>["init"] = ({ id, position }) => {
+  const init: Drawable<Img>["init"] = ({ id, position }) => {
     drawable.id = id;
     drawable.position = { ...drawable.position, ...position };
+    drawable.image.src = drawable.src;
+
+    drawable.image.onload = () => {
+      let width = 0;
+      let height = 0;
+
+      if (drawable.width !== undefined) {
+        width = drawable.width;
+        height =
+          drawable.width * (drawable.image.naturalHeight / drawable.image.naturalWidth);
+      }
+      if (drawable.height !== undefined) {
+        width =
+          drawable.height * (drawable.image.naturalWidth / drawable.image.naturalHeight);
+        height = drawable.height;
+      }
+
+      drawable.dimensions = {
+        w: drawable.padding.left + width + drawable.padding.right,
+        h: drawable.padding.top + height + drawable.padding.bottom,
+      };
+      drawable.width = width;
+      drawable.height = height;
+    };
   };
 
-  const move: Drawable<Text>["move"] = (position, constrain) => {
+  const move: Drawable<Img>["move"] = (position, constrain) => {
     const x = Math.min(
       Math.max(position.x, constrain.minX),
       constrain.maxX - drawable.dimensions.w,
@@ -40,27 +59,16 @@ export const text = ({
     drawable.position = { x, y };
   };
 
-  const render: Drawable<Text>["render"] = (context, { showBounds, selected }) => {
+  const render: Drawable<Img>["render"] = (context, { showBounds, selected }) => {
     if (drawable.id === "") return;
 
-    context.fillStyle = "#fff";
-    const prevFont = context.font;
-    context.font = `${drawable.fontSize}px Arial`;
-    const { width: height } = context.measureText("M");
-    const { width } = context.measureText(drawable.text);
-
-    drawable.offset = { x: 0, y: height };
-    drawable.dimensions = {
-      w: drawable.padding.left + width + drawable.padding.right,
-      h: drawable.padding.top + height + drawable.padding.bottom,
-    };
-
-    context.fillText(
-      drawable.text,
-      drawable.position.x + drawable.padding.left + drawable.offset.x,
-      drawable.position.y + drawable.padding.top + drawable.offset.y,
+    context.drawImage(
+      drawable.image,
+      drawable.position.x,
+      drawable.position.y,
+      drawable.width ?? 0,
+      drawable.height ?? 0,
     );
-    context.font = prevFont;
 
     if (selected && !showBounds) {
       context.strokeStyle = "#fff";
@@ -98,10 +106,9 @@ export const text = ({
       context.font = prevFont;
     }
   };
-  const update: Drawable<Text>["update"] = ({ fontSize, text }) => {
-    void (fontSize && (drawable.fontSize = fontSize));
-    void (text !== undefined && (drawable.text = text));
+  const update: Drawable<Img>["update"] = () => {
+    ///
   };
 
-  return Object.assign(drawable, { move, render, update, init }) as Drawable<Text>;
+  return Object.assign(drawable, { move, render, update, init }) as Drawable<Img>;
 };

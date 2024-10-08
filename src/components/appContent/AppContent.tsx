@@ -8,7 +8,12 @@ export const AppContent: FC = (): JSX.Element => {
 
   return (
     <>
-      <canvas ref={ref} style={{ outline: "1px solid white" }} width={800} height={600} />
+      <canvas
+        ref={ref}
+        style={{ outline: "1px solid white" }}
+        width={1500}
+        height={900}
+      />
       <GlobalStyle />
     </>
   );

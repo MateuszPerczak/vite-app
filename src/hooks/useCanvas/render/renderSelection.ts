@@ -2,9 +2,10 @@ import type { State } from "../useCanvas.types";
 
 export const renderSelection = (
   context: CanvasRenderingContext2D,
-  { mouse: { clickedPos, position }, selectedDrawables }: State,
+  { mouse: { clickedPos, position, isMouseSelecting } }: State,
 ) => {
-  if (clickedPos === null || selectedDrawables !== null) return;
+  if (clickedPos === null || !isMouseSelecting) return;
+  context.beginPath();
   context.rect(
     clickedPos.x,
     clickedPos.y,
@@ -13,4 +14,5 @@ export const renderSelection = (
   );
   context.strokeStyle = "#fff";
   context.stroke();
+  context.closePath();
 };
