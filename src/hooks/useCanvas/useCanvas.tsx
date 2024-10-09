@@ -35,8 +35,8 @@ export const useCanvas = () => {
     constrain: {
       minX: 0,
       minY: 0,
-      maxX: 1500,
-      maxY: 900,
+      maxX: 800,
+      maxY: 600,
     },
   });
 
@@ -93,52 +93,6 @@ export const useCanvas = () => {
               }),
             ],
           }),
-          text({
-            text: "Sperma to eksportowy towar",
-            fontSize: 15,
-          }),
-          text({
-            text: "Siura wyciągam z kieszeni",
-            fontSize: 10,
-          }),
-          separator({ size: 100, orientation: "horizontal" }),
-
-          box({
-            padding: { top: 10, left: 10, right: 10, bottom: 10 },
-            direction: "column",
-            gap: 5,
-            children: [
-              image({
-                src: "https://oursaferschools.co.uk/wp-content/uploads/2021/09/Featured-Post.jpg",
-                width: 300,
-              }),
-              text({
-                text: "Furasy jebane",
-                fontSize: 15,
-              }),
-            ],
-          }),
-
-          box({
-            padding: { top: 10, left: 10, right: 10, bottom: 10 },
-            direction: "column",
-            gap: 5,
-            children: [
-              image({
-                src: "https://pbs.twimg.com/media/GV_R11caoAMS72f?format=jpg",
-                width: 300,
-              }),
-              separator({ size: 300, orientation: "horizontal" }),
-              text({
-                text: "Well shit",
-                fontSize: 15,
-              }),
-            ],
-          }),
-          image({
-            src: "https://pbs.twimg.com/media/GR0QnDQWcAAwhc1?format=jpg",
-            width: 500,
-          }),
         ],
       };
 
@@ -146,6 +100,7 @@ export const useCanvas = () => {
         drawable.init({
           id: getId(10),
           position: { x: 20 * (index + 1), y: 20 * (index + 1) },
+          context,
         }),
       );
       render(newState);
@@ -168,8 +123,10 @@ export const useCanvas = () => {
         userInterface: { ...prevState.userInterface, drawables: layout, update },
       };
 
+      const position: Position = { x: 0, y: 0 };
+
       newState.userInterface.drawables.forEach((drawable) =>
-        drawable.init({ id: getId(10) }),
+        drawable.init({ id: getId(10), position, context }),
       );
       render(newState);
       return newState;
@@ -329,8 +286,8 @@ export const useCanvas = () => {
     // clear canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
     renderSelection(context, _state);
-    renderDrawables(context, _state);
-    renderUserInterface(context, _state);
+    renderDrawables(_state);
+    renderUserInterface(_state);
   };
 
   const init = () => {

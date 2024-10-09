@@ -34,8 +34,8 @@ export type Drawable<T extends object> = {
   position: Position;
   dimensions: Dimensions;
   padding: Padding;
-
-  render: (context: CanvasRenderingContext2D, renderProps: DrawableRenderProps) => void;
+  context: CanvasRenderingContext2D | null;
+  render: (renderProps: DrawableRenderProps) => void;
   move: (position: Position, constrain: Constrain) => void;
   update: (props: Partial<T>) => void;
   init: (props: DrawableInitProps) => void;
@@ -46,12 +46,12 @@ export type OmitDrawableProps = "move" | "render" | "update" | "init";
 export type DrawableRenderProps = {
   showBounds?: boolean;
   selected: boolean;
-  constrain: Constrain;
 };
 
 export type DrawableInitProps = {
   id: string;
   position?: Position;
+  context: CanvasRenderingContext2D;
 };
 
 export type Position = {

@@ -1,12 +1,8 @@
 import type { State } from "../useCanvas.types";
 
-export const renderDrawables = (
-  context: CanvasRenderingContext2D,
-  { drawables, selectedDrawables, showBounds, constrain }: State,
-) => {
+export const renderDrawables = ({ drawables, selectedDrawables, showBounds }: State) => {
   drawables.forEach((drawable) =>
-    drawable.render(context, {
-      constrain,
+    drawable.render({
       showBounds,
       selected: selectedDrawables?.includes(drawable.id) ?? false,
     }),

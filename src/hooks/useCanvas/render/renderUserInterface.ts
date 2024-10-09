@@ -1,14 +1,10 @@
 import type { State } from "../useCanvas.types";
 
-export const renderUserInterface = (
-  context: CanvasRenderingContext2D,
-  { userInterface, constrain }: State,
-) => {
+export const renderUserInterface = ({ userInterface }: State) => {
   userInterface.drawables.forEach((drawable) =>
-    drawable.render(context, {
+    drawable.render({
       showBounds: userInterface.showBounds,
       selected: false,
-      constrain,
     }),
   );
 };
