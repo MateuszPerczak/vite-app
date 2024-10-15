@@ -1,3 +1,2 @@
-export { renderDrawables } from "./renderDrawables";
+export { renderLayers } from "./renderLayers";
 export { renderSelection } from "./renderSelection";
-export { renderUserInterface } from "./renderUserInterface";

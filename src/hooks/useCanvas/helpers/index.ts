@@ -1,9 +1,6 @@
+export { getId } from "./id.helpers";
 export {
-  getDrawablePositionFromOffset,
-  getDrawablesFromId,
-  getDrawablesFromPointing,
-  getDrawablesFromSelecting,
+  getDrawablesFromPosition,
   getDrawablesIds,
-  getDrawablesOffsets,
-  mergeDrawables,
-} from "./drawable.helpers";
+  getMousePosition,
+} from "./mouse.helpers";

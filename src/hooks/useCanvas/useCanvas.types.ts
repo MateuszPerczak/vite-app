@@ -4,19 +4,15 @@ import type { SeparatorDrawable } from "./components/separator/separator.types";
 import type { TextDrawable } from "./components/text/text.types";
 
 export type State = {
+  layers: Layer[];
   mouse: Mouse;
-  drawables: Drawables[];
-  selectedDrawables: string[] | null;
-  drawablesOffsets: Record<string, Position> | null;
-  showBounds: boolean;
-  userInterface: UserInterface;
   constrain: Constrain;
 };
 
-export type UserInterface = {
+export type Layer = {
+  name: string;
   drawables: Drawables[];
   showBounds: boolean;
-  update: (props: State) => void;
 };
 
 export type Mouse = {
@@ -25,6 +21,14 @@ export type Mouse = {
   isMouseDown: boolean;
   isMouseSelecting: boolean;
   wasMousePointingAtDrawable: boolean;
+  layer: string;
+  selection: string[] | null;
+};
+
+export type UserInterface = {
+  drawables: Drawables[];
+  showBounds: boolean;
+  update: (props: State) => void;
 };
 
 export type Drawables = TextDrawable | BoxDrawable | SeparatorDrawable | ImgDrawable;
