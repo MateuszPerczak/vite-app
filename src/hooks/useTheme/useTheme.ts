@@ -5,7 +5,7 @@ import themes, { ColorThemes } from "../../theme/themes";
 
 type UpdateThemeProps = MediaQueryListEvent | MediaQueryList;
 
-const useTheme = (): Theme => {
+export const useTheme = (): Theme => {
   const [theme, setTheme] = useState<ColorThemes>(ColorThemes.Dark);
 
   const updateTheme = ({ matches }: UpdateThemeProps): void => {
@@ -23,5 +23,3 @@ const useTheme = (): Theme => {
 
   return themes[theme];
 };
-
-export default useTheme;
